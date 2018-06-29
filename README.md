@@ -12,3 +12,9 @@
           'possible_dates' : [datetime.datetime(2018, 4, 30, 10, 0, 0, 0), datetime.datetime(2018, 5, 1, 11, 0, 0, 0)],
           'text' : 'Mary will open her shop at 10am mondays and 11am tuesdays.'
         }
+
+# usage
+  
+  from string_to_datetime import GetTime
+  GetTime_Object = GetTime(text="text to get time from", zone='time zone as string')
+  time_found = GetTime_Object()
