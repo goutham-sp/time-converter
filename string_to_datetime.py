@@ -1,9 +1,6 @@
-import arrow
 import datefinder
 import datetime
-import parsedatetime
 from pytime import pytime
-from pprint import pprint
 from humandate import parse_date
 import pytz
 
@@ -20,7 +17,7 @@ class GetTime(object):
 			zone: Time zone to convert datetime object to
 	"""
 	def __init__(self, text, zone = pytz.timezone("Asia/Calcutta")):
-		self.text = text
+		self.text = text.replace('.', '-')
 		self.possible_dates = []
 		self.zone = zone
 
@@ -48,22 +45,6 @@ class GetTime(object):
 				self.possible_dates.append(item)
 			return_dict['possible_dates'] = self.possible_dates
 
-	def get_on_fail(self):
-		"""
-			On fail of the above function this can be called to find time with typos
-
-			params : None
-			returns : dict object with possible dates and text
-		"""
-		print("On Fail")
-		return_dict = {
-			'possible_dates' : self.possible_dates,
-			'text' : self.text
-		}
-		p = parsedatetime.Calendar()
-		return_dict['possible_dates'].append(p.parseDT(self.text)[0].astimezone(self.zone))
-		return return_dict
-
 	# Handles dates times like <next month>
 	def second_fail(self):
 		"""
@@ -74,10 +55,13 @@ class GetTime(object):
 		"""
 		print("Second Fail")
 		return_dict = {
-			'possible_dates' : self.possible_dates,
+			'possible_dates' : [],
 			'text' : self.text
 		}
+
+		print(parse_date(self.text).astimezone(self.zone))
 		return_dict['possible_dates'].append(parse_date(self.text).astimezone(self.zone))
+
 		return return_dict
 
 	# Detects for improper formats like <21dayz2weks, 23month3dy29minu>
@@ -101,17 +85,14 @@ class GetTime(object):
 			Object call method to find all the dates in a text passed as object parameter
 
 			params : text to be converted to datetime
-			returns : dict object with possible dates and text if all cases fai, returns datetime.datetime.now()
-					as possible dates
+			returns : dict object with possible dates as possible dates
 		"""
 		try:
 			ret_dict = self.get_time()
-			if ret_dict['possible_dates'] == []:
-				ret_dict = self.get_on_fail()
-				if ret_dict['possible_dates'] == []:
-					ret_dict = self.second_fail()
-					if ret_dict['possible_dates'] == []:
-						ret_dict = self.third_fail()
+			if not ret_dict['possible_dates']:
+				ret_dict = self.second_fail()
+				if not ret_dict['possible_dates']:
+					ret_dict = self.third_fail()
 			elif len(ret_dict['possible_dates']) == 0 or len(ret_dict['possible_dates']) > 1:
 				ret_dict = {
 					'possible_dates' : [],
@@ -119,7 +100,6 @@ class GetTime(object):
 				}
 				dates = []
 				dates.append(self.get_time())
-				dates.append(self.get_on_fail())
 				dates.append(self.second_fail())
 				dates.append(self.third_fail())
 
@@ -131,7 +111,7 @@ class GetTime(object):
 		except Exception as e:
 			print(e)
 			ret_dict = {
-				'possible_dates' : [datetime.datetime.now().astimezone(self.zone)],
+				'possible_dates' : [],
 				'text' : self.text
 			}
 
