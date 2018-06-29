@@ -18,4 +18,5 @@
   from string_to_datetime import GetTime
   
   GetTime_Object = GetTime(text="text to get time from", zone='time zone as string')
+  
   time_found = GetTime_Object()
